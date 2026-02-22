@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sual</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0d0d0d;
+    font-family: 'Lato', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Animated background blobs */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.25;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .blob1 { width: 500px; height: 500px; background: #e63946; top: -150px; left: -150px; animation-duration: 14s; }
+  .blob2 { width: 400px; height: 400px; background: #f4a261; bottom: -100px; right: -100px; animation-duration: 10s; }
+  .blob3 { width: 300px; height: 300px; background: #e63946; bottom: 50px; left: 20%; animation-duration: 18s; }
+
+  @keyframes drift {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(40px, 30px) scale(1.1); }
+  }
+
+  .card {
+    position: relative;
+    z-index: 10;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 60px 70px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    max-width: 560px;
+    width: 90%;
+  }
+
+  .emoji {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    display: block;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.12); }
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.95rem;
+    margin-bottom: 48px;
+    letter-spacing: 0.04em;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* HƏ button */
+  .btn-yes {
+    padding: 16px 44px;
+    font-size: 1.1rem;
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #e63946, #f4a261);
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(230,57,70,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-yes:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 14px 40px rgba(230,57,70,0.55);
+  }
+  .btn-yes:active { transform: scale(0.97); }
+
+  /* YOX button */
+  .btn-no {
+    padding: 16px 44px;
+    font-size: 1.1rem;
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    border: none;
+    border-radius: 50px;
+    cursor: default;
+    background: linear-gradient(135deg, #e63946, #f4a261);
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(230,57,70,0.4);
+    position: fixed;
+    transition: opacity 0.15s;
+    user-select: none;
+    pointer-events: auto;
+  }
+
+  /* Result screens */
+  .result {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .result.show { display: flex; }
+  .result-emoji { font-size: 4rem; }
+  .result-text {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 1.8rem;
+  }
+  .result-sub {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.95rem;
+  }
+
+  .main-content { }
+</style>
+</head>
+<body>
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<div class="card">
+  <!-- MAIN QUESTION -->
+  <div class="main-content" id="mainContent">
+    <span class="emoji">💌</span>
+    <h1>Mənimlə çıxmaq istərdinmi?</h1>
+    <p class="subtitle">Diqqətlə düşün — yalnız bir düyməyə click edə bilərsən.</p>
+    <div class="buttons">
+      <button class="btn-yes" onclick="onYes()">Hə</button>
+      <button class="btn-no" id="noBtn">Yox</button>
+    </div>
+  </div>
+
+  <!-- YES RESULT -->
+  <div class="result" id="yesResult">
+    <div class="result-emoji">🎉</div>
+    <div class="result-text">Əla! Bildirdim ki!</div>
+    <div class="result-sub">Bu cavabı gözləyirdim 😄</div>
+  </div>
+</div>
+
+<script>
+  const noBtn = document.getElementById('noBtn');
+  const mainContent = document.getElementById('mainContent');
+  const yesResult = document.getElementById('yesResult');
+
+  // Place "Yox" button initially near its natural spot
+  function placeInitially() {
+    const btnYes = document.querySelector('.btn-yes');
+    const rect = btnYes.getBoundingClientRect();
+    noBtn.style.left = (rect.right + 20) + 'px';
+    noBtn.style.top  = rect.top + 'px';
+  }
+
+  window.addEventListener('load', placeInitially);
+  window.addEventListener('resize', placeInitially);
+
+  // Flee on mouseover/touchstart
+  noBtn.addEventListener('mouseover', flee);
+  noBtn.addEventListener('touchstart', flee, { passive: true });
+
+  function flee() {
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
+    const maxX = window.innerWidth  - btnW - 10;
+    const maxY = window.innerHeight - btnH - 10;
+
+    let newX, newY;
+    // Try a few times to pick a position far from cursor — simple random is fine
+    newX = Math.random() * maxX;
+    newY = Math.random() * maxY;
+
+    noBtn.style.left = newX + 'px';
+    noBtn.style.top  = newY + 'px';
+  }
+
+  function onYes() {
+    mainContent.style.display = 'none';
+    yesResult.classList.add('show');
+  }
+</script>
+</body>
+</html>
